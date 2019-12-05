@@ -322,6 +322,7 @@ function rebuildList(containerEl, items) {
 };
 
 
+
 const lastPostsBtn = document.createElement('button');
 lastPostsBtn.className = 'btn btn-primary btn-block mt-1';
 lastPostsBtn.textContent = 'Показать еще посты';
