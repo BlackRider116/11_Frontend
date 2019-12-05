@@ -100,7 +100,7 @@ mediaRec.addEventListener('click', function (ev) {
         document.body.appendChild(alertEl);
         return;
     }
-    navigator.mediaDevices.getUserMedia({audio: true, video: true})
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
         .then(stream => {
             sendEl.disabled = true;
             mediaEl.disabled = true;
@@ -248,7 +248,7 @@ function rebuildList(containerEl, items) {
             `;
         } else if (item.type === 'video') {
             postEl.innerHTML = `
-                <video src="${item.file}" class="card-img-top" controls></video>
+                <video src="${item.file}" width="960" height="540" class="embed-responsive embed-responsive-16by9 card-img-top" controls></video>
                 <div class="card-body">
                     <p style='font-size:20px'>${item.content}</p>
                     <button class="btn">♡ ${item.likes}</button>
