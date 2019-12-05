@@ -18,7 +18,7 @@ addFormEl.innerHTML = `
     <input type="hidden" name="type">
     <input type="hidden" name="url">
     <input data-id="files" type="file" name="media">
-    <button data-id="record" class="btn btn-light"> 🔴 </button>
+    <button data-id="record" class="btn btn-light">Запись</button>
     <button data-id="send" class="btn btn-primary">Добавить</button>
   </div>
 </form>
