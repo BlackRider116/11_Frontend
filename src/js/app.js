@@ -8,18 +8,17 @@ const rootEl = document.getElementById('root');
 
 const addFormEl = document.createElement('form');
 addFormEl.innerHTML = `
-<form>
-  <div class="form-row">
-    <div class="col-5">
-    <input class="form-control" placeholder="Введите текст" data-id="link">
-    </div>
+<div class="input-group">
+  <input type="text" class="form-control" placeholder="Введите текст" data-id="link">
+  <div class="input-group-append" id="button-addon4">
     <input type="hidden" name="type">
     <input type="hidden" name="url">
-    <input data-id="files" type="file" name="media">
-    <button data-id="record" class="btn btn-light">Запись</button>
-    <button data-id="send" class="btn btn-primary">Добавить</button>
+    <input data-id="files" type="file" name="media" style="visibility: hidden; opacity: 0.0001; height: 1px; width: 1px;">
+    <button data-action="upload" class="btn btn-outline-secondary" type="button">Загрузить</button>
+    <button data-id="record" class="btn btn-outline-secondary" type="button">Записать</button>
+    <button data-id="send" class="btn btn-outline-primary" type="button">Добавить</button>
   </div>
-</form>
+</div>
 `;
 rootEl.appendChild(addFormEl);//🎤 🔴 light
 
@@ -56,9 +55,13 @@ linkEl.addEventListener('input', (evt) => {
 });
 
 // загрузка медиа
+const uploadEl = document.querySelector('[data-action=upload]');
 const typeEl = document.querySelector('input[name=type]');
 const urlEl = document.querySelector('input[name=url]');
-const mediaEl = document.querySelector('input[name=media]');
+const mediaEl = document.querySelector('[data-id=files]');
+uploadEl.addEventListener('click', evt => {
+    mediaEl.dispatchEvent(new MouseEvent('click'));
+});
 mediaEl.addEventListener('change', ev => {
     ev.preventDefault();
     mediaRec.disabled = true;
@@ -104,7 +107,7 @@ mediaRec.addEventListener('click', function (ev) {
     navigator.mediaDevices.getUserMedia({ audio: true, video: true })
         .then(stream => {
             sendEl.disabled = true;
-            mediaEl.disabled = true;
+            uploadEl.disabled = true;
             const mediaRecorder = new MediaRecorder(stream, {
                 mediaType: 'video/webm',
             });
@@ -171,7 +174,7 @@ addFormEl.querySelector('[data-id=send]').addEventListener('click', function (ev
         typeEl.value = '';
         urlEl.value = '';
         mediaEl.value = '';
-        mediaEl.disabled = false;
+        uploadEl.disabled = false;
         mediaRec.disabled = false;
         localStorage.clear();
         firstSeenId = data.id;
@@ -215,7 +218,6 @@ function returnPost(post) {
             <button class="btn btn-primary" data-action="like">👍</button>
             <button class="btn btn-danger" data-action="dislike">👎</button>
             <button class="btn btn-light" data-action="delete">Удалить пост</button>
-            <button>${post.id}
         </div>
     `;
     } else if (post.type === 'image') {
