@@ -4,8 +4,6 @@ const baseUrl = 'https://backend-dz11.herokuapp.com';
 let firstSeenId = 0;
 let lastSeenId = 0;
 
-let lastPosts = [];
-
 const rootEl = document.getElementById('root');
 
 const addFormEl = document.createElement('form');
@@ -31,6 +29,7 @@ newPostsBtn.className = 'btn btn-primary btn-block mt-1';
 newPostsBtn.textContent = 'Показать новые записи';
 newPostsBtn.style.display = "none";
 newPostsBtn.addEventListener('click', (ev) => {
+    ev.preventDefault();
     fetch(`${baseUrl}/posts/${firstSeenId}`)
         .then(response => {
             if (!response.ok) {
@@ -39,8 +38,7 @@ newPostsBtn.addEventListener('click', (ev) => {
             return response.json();
         }).then(function (data) {
             firstSeenId = 0;
-            lastPosts.unshift(...data.reverse());
-            rebuildList(postsEl, lastPosts);
+            rebuildList(postsEl, data, 1);
             newPostsBtn.style.display = "none";
         }).catch(error => {
             console.log(error);
@@ -169,7 +167,6 @@ addFormEl.querySelector('[data-id=send]').addEventListener('click', function (ev
         }
         return response.json();
     }).then(data => {
-        console.log(data)
         linkEl.value = '';
         typeEl.value = '';
         urlEl.value = '';
@@ -177,9 +174,9 @@ addFormEl.querySelector('[data-id=send]').addEventListener('click', function (ev
         mediaEl.disabled = false;
         mediaRec.disabled = false;
         localStorage.clear();
-        lastPosts.unshift(data);
         firstSeenId = data.id;
-        rebuildList(postsEl, lastPosts);
+
+        rebuildList(postsEl, Array(data), 1);
     }).catch(error => {
         console.log(error)
     });
@@ -198,14 +195,11 @@ startGet.then(response => {
     return response.json();
 }).then(function (data) {
     if (data.length !== 0) {
-        if (data.length < 5) {
-            lastPosts.push(...data.reverse());
-        } else {
+        if (data.length >= 5) {
             lastSeenId = data[data.length - 5].id;
-            lastPosts.push(...data.reverse());
             lastPostsBtn.style.display = "block";
         }
-        rebuildList(postsEl, lastPosts)
+        rebuildList(postsEl, data.reverse())
     }
 }).catch(error => {
     console.log(error);
@@ -217,10 +211,11 @@ function returnPost(post) {
         return `
         <div class="card-body">
             <div class="card-text">${post.content}</div>
-            <button class="btn">♡ ${post.likes}</button>
+            <button class="btn" data-id="likes">♡ ${post.likes}</button>
             <button class="btn btn-primary" data-action="like">👍</button>
             <button class="btn btn-danger" data-action="dislike">👎</button>
             <button class="btn btn-light" data-action="delete">Удалить пост</button>
+            <button>${post.id}
         </div>
     `;
     } else if (post.type === 'image') {
@@ -228,7 +223,7 @@ function returnPost(post) {
         <img src="${post.file}" class="card-img-top"></img>
         <div class="card-body">
             <p style='font-size:20px'>${post.content}</p>
-            <button class="btn">♡ ${post.likes}</button>
+            <button class="btn" data-id="likes">♡ ${post.likes}</button>
             <button class="btn btn-primary" data-action="like">👍</button>
             <button class="btn btn-danger" data-action="dislike">👎</button>
             <button class="btn btn-light" data-action="delete">Удалить пост</button>
@@ -239,7 +234,7 @@ function returnPost(post) {
         <audio src="${post.file}" class="card-img-top" controls></audio>
         <div class="card-body">
             <p style='font-size:20px'>${post.content}</p>
-            <button class="btn">♡ ${post.likes}</button>
+            <button class="btn" data-id="likes">♡ ${post.likes}</button>
             <button class="btn btn-primary" data-action="like">👍</button>
             <button class="btn btn-danger" data-action="dislike">👎</button>
             <button class="btn btn-light" data-action="delete">Удалить пост</button>
@@ -250,7 +245,7 @@ function returnPost(post) {
         <video src="${post.file}" width="960" height="540" class="embed-responsive embed-responsive-16by9 card-img-top" controls></video>
         <div class="card-body">
             <p style='font-size:20px'>${post.content}</p>
-            <button class="btn">♡ ${post.likes}</button>
+            <button class="btn" data-id="likes">♡ ${post.likes}</button>
             <button class="btn btn-primary" data-action="like">👍</button>
             <button class="btn btn-danger" data-action="dislike">👎</button>
             <button class="btn btn-light" data-action="delete">Удалить пост</button>
@@ -261,14 +256,11 @@ function returnPost(post) {
 
 
 // рисует посты
-function rebuildList(containerEl, items) {
-    console.log(lastPosts)
-    // containerEl.innerHTML = '';
-    for (const item of items) {
-        const postEl = document.createElement('div');
+function rebuildList(containerEl, items, arrangement) {
+    for (let item of items) {
+        const postEl = document.createElement('li');
         postEl.className = 'card mb-2';
         postEl.innerHTML = returnPost(item)
-
 
         postEl.querySelector('[data-action=delete]').addEventListener('click', function () {
             fetch(`${baseUrl}/posts/${item.id}`, {
@@ -279,11 +271,7 @@ function rebuildList(containerEl, items) {
                 }
                 return response.json();
             }).then(data => {
-                const index = lastPosts.findIndex((post) => {
-                    return post.id === item.id
-                })
-                lastPosts.splice(index, 1)
-                rebuildList(postsEl, lastPosts);
+                containerEl.removeChild(postEl);
             }).catch(error => {
                 console.log(error)
             });
@@ -299,11 +287,7 @@ function rebuildList(containerEl, items) {
                 }
                 return response.json();
             }).then(data => {
-                const index = lastPosts.findIndex((post) => {
-                    return post.id === item.id
-                })
-                lastPosts[index].likes++;
-                rebuildList(postsEl, lastPosts);
+                postEl.querySelector('[data-id=likes]').textContent =`♡ ${data.likes}`
             }).catch(error => {
                 console.log(error)
             });
@@ -319,16 +303,16 @@ function rebuildList(containerEl, items) {
                 }
                 return response.json();
             }).then(data => {
-                const index = lastPosts.findIndex((post) => {
-                    return post.id === item.id
-                })
-                lastPosts[index].likes--;
-                rebuildList(postsEl, lastPosts);
+                postEl.querySelector('[data-id=likes]').textContent =`♡ ${data.likes}`
             }).catch(error => {
                 console.log(error)
             });
         });
-        containerEl.appendChild(postEl);
+        if (arrangement === 1) {
+            containerEl.insertBefore(postEl, containerEl.firstElementChild);
+        } else {
+            containerEl.appendChild(postEl)
+        }
     }
 };
 
@@ -338,7 +322,8 @@ const lastPostsBtn = document.createElement('button');
 lastPostsBtn.className = 'btn btn-primary btn-block mt-1';
 lastPostsBtn.textContent = 'Показать еще посты';
 lastPostsBtn.style.display = "none";
-lastPostsBtn.addEventListener('click', function () {
+lastPostsBtn.addEventListener('click', function (ev) {
+    ev.preventDefault();
     fetch(`${baseUrl}/posts/seenPosts/${lastSeenId}`)
         .then(response => {
             if (!response.ok) {
@@ -352,15 +337,12 @@ lastPostsBtn.addEventListener('click', function () {
             else {
                 if (data.length < 5) {
                     lastSeenId = data[data.length - 1].id;
-                    lastPosts.push(...data.reverse());
                     lastPostsBtn.style.display = "none";
                 } else {
                     lastSeenId = data[data.length - 5].id;
-                    lastPosts.push(...data.reverse());
                     lastPostsBtn.style.display = "block";
-
                 }
-                rebuildList(postsEl, lastPosts);
+                rebuildList(postsEl, data.reverse());
             }
         }).catch(error => {
             console.log(error);
