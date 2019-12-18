@@ -1,5 +1,5 @@
-const baseUrl = 'https://backend-dz11.herokuapp.com';
-// const baseUrl = 'http://localhost:9999';
+// const baseUrl = 'https://backend-dz11.herokuapp.com';
+const baseUrl = 'http://localhost:9999';
 
 let firstSeenId = 0;
 let lastSeenId = 0;
@@ -213,11 +213,12 @@ function returnPost(post) {
     if (post.type === '') {
         return `
         <div class="card-body">
-            <div class="card-text">${post.content}</div>
+            <p style='font-size:20px'>${post.content}</p>
             <button class="btn" data-id="likes">♡ ${post.likes}</button>
             <button class="btn btn-primary" data-action="like">👍</button>
             <button class="btn btn-danger" data-action="dislike">👎</button>
             <button class="btn btn-light" data-action="delete">Удалить пост</button>
+            
         </div>
     `;
     } else if (post.type === 'image') {
@@ -229,6 +230,7 @@ function returnPost(post) {
             <button class="btn btn-primary" data-action="like">👍</button>
             <button class="btn btn-danger" data-action="dislike">👎</button>
             <button class="btn btn-light" data-action="delete">Удалить пост</button>
+            
         </div>
     `;
     } else if (post.type === 'audio') {
@@ -240,6 +242,7 @@ function returnPost(post) {
             <button class="btn btn-primary" data-action="like">👍</button>
             <button class="btn btn-danger" data-action="dislike">👎</button>
             <button class="btn btn-light" data-action="delete">Удалить пост</button>
+            
         </div>
     `;
     } else if (post.type === 'video') {
@@ -251,6 +254,7 @@ function returnPost(post) {
             <button class="btn btn-primary" data-action="like">👍</button>
             <button class="btn btn-danger" data-action="dislike">👎</button>
             <button class="btn btn-light" data-action="delete">Удалить пост</button>
+            
         </div>
     `;
     };
